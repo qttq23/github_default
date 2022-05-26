@@ -10,7 +10,8 @@ after creating repository, repository has a https url for later cloning from git
 
 - download & install Git. then set environemnt variable to point to Git's bin directory.
 
-- config git:
+- config git:  
+
 git config --global user.name "your_user_name"
 
 git config --global user.email "alternative_email_from_github"
@@ -53,12 +54,21 @@ git pull --set-upstream origin branch_name (for first tme, later just: git pull)
 
 git log
 
+git checkout -b copied_branch
+
 git help command_name
 
 git remote add origin "https://..."
 
 git remote -v
 
+git config --global pull.ff
+
+git pull --rebase origin main
+
+git checkout main
+
+git merge feature_branch
 
 
 
@@ -72,17 +82,16 @@ see my own answer: https://stackoverflow.com/a/72351761/16550663
 
 see sample repo: https://github.com/qttq23/hell-world.git
 
-( in a nutshell:
+in a nutshell:
 - create a github-action to validate the actor who clicks 'run'/'re-run'. if that actor is a powerful collaborator, the github-action passes.
 - go to settings, set rule for main branch. select 'pass check before mergeing' and 'required up to date'. search the jobs specified in github-action. 
-if jobs not shown, try run the action manually some times then try again.
+(if jobs not shown, try run the action manually some times then try again.)
 - to prevent others from editing github-action file, create CODEOWNERS file.
 - go to settings, set rule for main branch: set 'require pull request before merging', 'dismiss stale approval', 'required code owner review'.
-)
 
 
 # Github merge, rebase, fast-forward:
-recommended:
+**recommended**:
 - set default: git config --global pull.ff only (this makes pull aborted if upstream branch & local branch diverge).
 - if divergence, try: git pull --rebase (this makes everything you made appears after the upstream's changes. 
 so you can easily look at what you did)
@@ -93,71 +102,69 @@ if rebase conflict, you resolve conflicted file and continue rebase workflows (g
 while in merge, git shows you what files are conflicted, you resolve then commit. that's it.
 )
 
-fast-forward: can only happen when the receiving branch is behind the merging branch. git pull always try using fast-forward before other methods.
-eg: if branchA fast-forward merges branch B.
-branchB: 1->2->3->4
-branchA: 1->2
-after fast-forward: branchA: 1->2->3->4 (the head of A is fast-forwarded to 4)
-command-line: 
- git checkout branchA
- git pull --ff-only . branchB
+**fast-forward**: can only happen when the receiving branch is behind the merging branch. git pull always try using fast-forward before other methods.  
+eg: if branchA fast-forward merges branch B.  
+branchB: 1->2->3->4  
+branchA: 1->2  
+after fast-forward: branchA: 1->2->3->4 (the head of A is fast-forwarded to 4)  
+command-line:   
+ git checkout branchA  
+ git pull --ff-only . branchB  
 
-rebase: put changes of receiving branch after the base branch. no merge commit is created. usually used when pulling another remote branch.
-eg: if branch A rebases to branch B:
-branchB: 1->2->3->4
-branchA: 1->2->5->6
-after rebase: branchA: 1->2->3->4 ->5->6 (the changes of A is put after the tip of branch B)
-command-line: 
- git checkout branchA
- git pull --rebase origin branchB
+**rebase**: put changes of receiving branch after the base branch. no merge commit is created. usually used when pulling another remote branch.  
+eg: if branch A rebases to branch B:  
+branchB: 1->2->3->4  
+branchA: 1->2->5->6  
+after rebase: branchA: 1->2->3->4 ->5->6 (the changes of A is put after the tip of branch B)  
+command-line:   
+ git checkout branchA  
+ git pull --rebase origin branchB  
 
-rebase interactive: usually used when re-writing commit history for its own branch. for example, combine some unneccessary commits into one.
+**rebase interactive**: usually used when re-writing commit history for its own branch. for example, combine some unneccessary commits into one.
 It's dangerous due to potential commit removing permanently (if you accidentally hit the command 'drop' in rebase editor).
 Use it carefully if you have really long list of commits for a single feature.
 (note that if you squash to some old shared commits, when you create pull request, you will see old changes along with new changes. 
 only after you merge that pull request, the merge commit is generated and that merge commit will contain new changes. 
-It's safe, but make you hard to know which changes is old or new)
-command-line:
- get checkout branchA
- git rebase --interactive commit_sha...
- in rebase editor:
-  i: to insert.
-  esc: to go out of insert mode.
-  :wq -> write then quit.
-  :exit -> abort.
+It's safe, but make you hard to know which changes is old or new)  
+command-line:  
+ get checkout branchA  
+ git rebase --interactive commit_sha...  
+ in rebase editor:  
+  i: to insert.  
+  esc: to go out of insert mode.  
+  :wq -> write then quit.  
+  :exit -> abort.  
 
+**merge**: (or three-ways merge), will mix changes from receiving branch to passed branch in timestamp order. create a separate commit indicates merging.  
+eg: if branchA merges branch B.  
+branchB: 1->2->4->6  
+branchA: 1->2->3->5  
+after merging: branchA: 1->2->3->4->5->6->new merge commit  
+command-line:   
+ git checkout branchA  
+ git merge branchB  
 
-merge: (or three-ways merge), will mix changes from receiving branch to passed branch in timestamp order. create a separate commit indicates merging.
-eg: if branchA merges branch B.
-branchB: 1->2->4->6
-branchA: 1->2->3->5
-after merging: branchA: 1->2->3->4->5->6->new merge commit
-command-line: 
- git checkout branchA
- git merge branchB
+example:  
 
+nobase:  
+ remote: 1->2  
+ local: 3->4  
+-> rebase: ok. merge & fast-forward: failed.  
 
-example:
+1base:  
+ remote: 1-> 2->3  
+ local:  1-> 5->6  
+-> merge, rebase: ok. fast-forward: failed.  
 
-nobase:
- remote: 1->2
- local: 3->4
--> rebase: ok. merge & fast-forward: failed.
+uptodate:  
+ remote: 1->2  
+ local: 1->2->3->4  
+-> all are ok.  
 
-1base:
- remote: 1-> 2->3
- local:  1-> 5->6
--> merge, rebase: ok. fast-forward: failed.
-
-uptodate:
- remote: 1->2
- local: 1->2->3->4
--> all are ok.
-
-outdated:
- remote: 1->2->3->4
- local: 1->2
--> all are ok. because git pull always try and use fast-forward first.
+outdated:  
+ remote: 1->2->3->4  
+ local: 1->2  
+-> all are ok. because git pull always try and use fast-forward first.  
 
  
 
