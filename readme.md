@@ -1,4 +1,38 @@
 
+
+# git common commands:
+
+git clone "url" 
+
+git init
+
+git add .
+
+git commit -m "message abc..."
+
+git push -u origin branch_name (for first time, later just: git push)
+
+git pull --set-upstream origin branch_name (for first tme, later just: git pull)
+
+git log
+
+git checkout -b copied_branch
+
+git help command_name
+
+git remote add origin "https://..."
+
+git remote -v
+
+git config --global pull.ff
+
+git pull --rebase origin main
+
+git checkout main
+
+git merge feature_branch
+
+
 # github basics:
 
 - create account on Github.
@@ -38,40 +72,6 @@ Then do some identity-related tasks on git, it will open dialog to ask credentia
 remember to set user.email to your new alternative email.
 
 
-# git common commands:
-
-git clone "url" 
-
-git init
-
-git add .
-
-git commit -m "message abc..."
-
-git push -u origin branch_name (for first time, later just: git push)
-
-git pull --set-upstream origin branch_name (for first tme, later just: git pull)
-
-git log
-
-git checkout -b copied_branch
-
-git help command_name
-
-git remote add origin "https://..."
-
-git remote -v
-
-git config --global pull.ff
-
-git pull --rebase origin main
-
-git checkout main
-
-git merge feature_branch
-
-
-
 # Github control & manage branch:
 
 to avoid directly pushing to 'main' branch,
@@ -84,10 +84,14 @@ see sample repo: https://github.com/qttq23/hell-world.git
 
 in a nutshell:
 - create a github-action to validate the actor who clicks 'run'/'re-run'. if that actor is a powerful collaborator, the github-action passes.
+(use the 'pull_request_target' event instead of 'pull_request' event to make actions run from the 'base' context instead of 'merging' context)
 - go to settings, set rule for main branch. select 'pass check before mergeing' and 'required up to date'. search the jobs specified in github-action. 
 (if jobs not shown, try run the action manually some times then try again.)
+
+(if already use 'pull_request_target', old way below are not needed.
 - to prevent others from editing github-action file, create CODEOWNERS file.
-- go to settings, set rule for main branch: set 'require pull request before merging', 'dismiss stale approval', 'required code owner review'.
+- go to settings, set rule for main branch: set 'require pull request before merging', and all its sub-options.
+)
 
 
 # Github merge, rebase, fast-forward:
@@ -167,6 +171,54 @@ outdated:
 -> all are ok. because git pull always try and use fast-forward first.  
 
  
+# Github fork:
+In github repository, only collaborators are allowed to push/write to a new branch.
+Contributor (who're not a collaborator) can't create or update branch, they can only create pull request.
+Fork solves this. Contributors forks a repository to make their own repository.
+They can do anything with their own forked repository such as create and push to branch.
+When they need to contribute to original branch, they create they pull request from forked repo to original repo.
+
+issue: about github-actions
+ forkA/branch1 -> forkA/branch2 (github actions will run in pull request)
+ forkA/branch1 -> originRepo/branch1 (github actions may not running in pull request event ?? only run on 'pull_request_target' ??)
+
+practise:
+-create original repo
+(setup pull request restriction, see sample repo: https://github.com/qttq23/hell-world.git)
+
+-fork a repo on github web
+https://docs.github.com/en/get-started/quickstart/fork-a-repo#forking-a-repository
+
+-clone to local.
+https://docs.github.com/en/get-started/quickstart/fork-a-repo#cloning-your-forked-repository
+ 
+-set up local upstream
+https://docs.github.com/en/get-started/quickstart/fork-a-repo#configuring-git-to-sync-your-fork-with-the-original-repository
+
+-changes in local. push to web. (ok. the main branch on forked repo is not protected)
+
+-the original repo changed.
+
+-create pull request to original.
+https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork
+
+-pull changes and recommit to pull request.
+from local git:
+https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork#syncing-a-fork-from-the-command-line
+The local git pulls directly from original repo.
+
+from web ui:
+https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork#syncing-a-fork-from-the-web-ui
+if fetch & merge to web-ui, the local git has to pull from web-ui (the forked repo).
+
+
+-orginal repo commit additional changes.
+if pull request creator allows commits from original repo, then the original repo's collaborators (who have write access) will be able to make changes in the forked repo.
+In other word, original repo's collaborators can create branch or commit to any branch in forked repo.
+Therefore, they can update the changes directly to pull-request merging branch.
+https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/committing-changes-to-a-pull-request-branch-created-from-a-fork
+
+-original repo approves and merges changes from fork repo.
 
  
 
