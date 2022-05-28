@@ -172,53 +172,53 @@ outdated:
 
  
 # Github fork:
-In github repository, only collaborators are allowed to push/write to a new branch.
-Contributor (who're not a collaborator) can't create or update branch, they can only create pull request.
-Fork solves this. Contributors forks a repository to make their own repository.
-They can do anything with their own forked repository such as create and push to branch.
-When they need to contribute to original branch, they create they pull request from forked repo to original repo.
+In github repository, only collaborators are allowed to push/write to a new branch.  
+Contributor (who're not a collaborator) can't create or update branch, they can only create pull request.  
+Fork solves this. Contributors forks a repository to make their own repository.  
+They can do anything with their own forked repository such as create and push to branch.  
+When they need to contribute to original branch, they create they pull request from forked repo to original repo.  
 
-issue: about github-actions
- forkA/branch1 -> forkA/branch2 (github actions will run in pull request)
- forkA/branch1 -> originRepo/branch1 (github actions may not running in pull request event ?? only run on 'pull_request_target' ??)
+issue: about github-actions  
+ forkA/branch1 -> forkA/branch2 (github actions will run in pull request)  
+ forkA/branch1 -> originRepo/branch1 (github actions may not running in pull request event ?? only run on 'pull_request_target' ??)  
 
-practise:
--create original repo
-(setup pull request restriction, see sample repo: https://github.com/qttq23/hell-world.git)
+practise:  
+-create original repo  
+(setup pull request restriction, see sample repo: https://github.com/qttq23/hell-world.git)  
 
--fork a repo on github web
-https://docs.github.com/en/get-started/quickstart/fork-a-repo#forking-a-repository
+-fork a repo on github web  
+https://docs.github.com/en/get-started/quickstart/fork-a-repo#forking-a-repository  
 
--clone to local.
-https://docs.github.com/en/get-started/quickstart/fork-a-repo#cloning-your-forked-repository
+-clone to local.  
+https://docs.github.com/en/get-started/quickstart/fork-a-repo#cloning-your-forked-repository  
  
--set up local upstream
-https://docs.github.com/en/get-started/quickstart/fork-a-repo#configuring-git-to-sync-your-fork-with-the-original-repository
+-set up local upstream  
+https://docs.github.com/en/get-started/quickstart/fork-a-repo#configuring-git-to-sync-your-fork-with-the-original-repository  
 
--changes in local. push to web. (ok. the main branch on forked repo is not protected)
+-changes in local. push to web. (ok. the main branch on forked repo is not protected)  
 
--the original repo changed.
+-the original repo changed.  
 
--create pull request to original.
-https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork
+-create pull request to original.  
+https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork  
 
--pull changes and recommit to pull request.
-from local git:
-https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork#syncing-a-fork-from-the-command-line
-The local git pulls directly from original repo.
+-pull changes and recommit to pull request.  
+from local git:  
+https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork#syncing-a-fork-from-the-command-line  
+The local git pulls directly from original repo.  
 
-from web ui:
-https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork#syncing-a-fork-from-the-web-ui
-if fetch & merge to web-ui, the local git has to pull from web-ui (the forked repo).
+from web ui:  
+https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork#syncing-a-fork-from-the-web-ui  
+if fetch & merge to web-ui, the local git has to pull from web-ui (the forked repo).  
 
 
--orginal repo commit additional changes.
-if pull request creator allows commits from original repo, then the original repo's collaborators (who have write access) will be able to make changes in the forked repo.
-In other word, original repo's collaborators can create branch or commit to any branch in forked repo.
-Therefore, they can update the changes directly to pull-request merging branch.
-https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/committing-changes-to-a-pull-request-branch-created-from-a-fork
+-orginal repo commit additional changes.  
+if pull request creator allows commits from original repo, then the original repo's collaborators (who have write access) will be able to make changes in the forked repo.  
+In other word, original repo's collaborators can create branch or commit to any branch in forked repo.  
+Therefore, they can update the changes directly to pull-request merging branch.  
+https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/committing-changes-to-a-pull-request-branch-created-from-a-fork  
 
--original repo approves and merges changes from fork repo.
+-original repo approves and merges changes from fork repo.  
 
  
 
