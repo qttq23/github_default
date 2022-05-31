@@ -32,6 +32,10 @@ git checkout main
 
 git merge feature_branch
 
+git diff HEAD..branch
+
+git show HEAD..branch
+
 
 # github basics:
 
@@ -71,8 +75,93 @@ for Windows, go to Control panel > User accounts > credential manager > windows 
 Then do some identity-related tasks on git, it will open dialog to ask credentials again.
 remember to set user.email to your new alternative email.
 
+# commit & branch & changes/differences:
 
-# Github control & manage branch:
+Each **commit** is assigned a hash value which is unique within the repository.
+
+**branch** or **tag** is just a label pointing to a commit.
+branch can point to any commit, while tag is fixed at specified commit.
+
+For example, if branchA has 3 commits and then branchB is created based on branchA.  
+That would like below:  
+1->2->3 (branchA, branchB)  
+
+instead of:   
+1->2->3 (branchA)  
+1->2->3 (branchB) (wrong. never two commits with same hash value represennted in a repo)  
+
+then, if branchA commits and branchB commits, graph will be:  
+1->2->3->4 (branchA)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\   
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5 (branchB)  
+
+I recommend using: `gitk` or sublime merge (a git client) to view graph of commit history.
+
+### Changes after merging
+To view changes after merging, there's only way that is accurate is trying merging.  
+eg: 'main' is about to merge 'branch' (HEAD is pointing to 'main')  
+
+For simple cases where the 'branch' does not involve rebase,   
+use: `git show HEAD..branch`  
+
+For more accurate, create a temporary branch to try merging then compare differences.  
+create a temporary branch 'temp' based on 'main'.   
+then just merge 'temp' to 'branch'. after merging, 'temp' will point to the merge commit.  
+to see differences: ``git diff main..temp ``  
+(same strategy for view difference after rebasing)  
+
+--> in case forget to create 'temp' branch, use reflog:  
+``git reflog ``   
+(find the last checkout to 'main' branch)
+
+``git reset --hard last_checkout_commit  ``  
+(reset to last checkout commit in case the merge or rebase is not as expected)
+
+
+### git diff, git log, git show
+``git diff HEAD branch``  
+(show what're in 'branch' but not in 'HEAD'.  
+if HEAD is inherited from 'branch', then HEAD changes some files previously in 'branch', this command will show those differences in 'branch' too.  
+Those differences are not accounted when merging.  
+So this is not appropriate for previewing what changed after merging.
+)
+
+``git diff HEAD..branch``  
+(same as above: diff HEAD branch)  
+
+``git diff HEAD...branch``  
+(find the common ancestor of HEAD and branch, then compare it with the 'branch' (tip of 'branch')  
+if HEAD is inherited from 'branch' then 'branch' makes some changes. those changes will be shown by this command.  
+But consider the case 'branch' rebases to another branch, then the common ancestor will not the same as before.  
+then if use this command, the changes shown will include the common changes between HEAD and 'branch'. illustrated as below:  
+main: 1->2->3->4  
+test: 1->2->3  
+br2: 1->2->3->4  
+Now the common ancestor betwen main & br2 is 4.  
+
+then test changes: 1->2->3-> A  
+and 'main' rebases to branch 'test'.  
+main becomes: 1->2->3-> A ->4  
+
+now, if use command: ``git diff br2...main``  
+the common ancestor is 3, not 4 like before. so the changes are: A->4  
+4 are the common change, it is already in 'br2', but still be shown.  
+This makes this command also not appropriate for previewing what changes   after merging.
+
+)
+
+``git log HEAD..branch``  
+(show commits in 'branch' but not in 'HEAD')  
+
+``git log HEAD...branch``  
+(show every commits in 'branch' or 'HEAD' from the common ancestor)  
+
+``git show HEAD..branch``  
+(same as git log, but show commits along with changes)  
+
+
+# Github control & manage branch:  
 
 to avoid directly pushing to 'main' branch,
 to make all changes to 'main' branch must go through Pull Request.
@@ -222,5 +311,5 @@ https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/propos
 
  
 
-
-
+# Git submodule
+??
