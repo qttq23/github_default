@@ -88,7 +88,7 @@ in a nutshell:
 - go to settings, set rule for main branch. select 'pass check before mergeing' and 'required up to date'. search the jobs specified in github-action. 
 (if jobs not shown, try run the action manually some times then try again.)
 
-(if already use 'pull_request_target', old way below are not needed.
+(if already use 'pull_request_target', the old way below are not needed.
 - to prevent others from editing github-action file, create CODEOWNERS file.
 - go to settings, set rule for main branch: set 'require pull request before merging', and all its sub-options.
 )
@@ -97,32 +97,42 @@ in a nutshell:
 # Github merge, rebase, fast-forward:
 **recommended**:
 - set default: git config --global pull.ff only (this makes pull aborted if upstream branch & local branch diverge).
-- if divergence, try: git pull --rebase (this makes everything you made appears after the upstream's changes. 
-so you can easily look at what you did)
-- if you want your branch to be up-to-date with the certain branch, use merge. don't rebase. only rebase (in standard mode, not interactive) when pulling. 
+- if divergence, try: git pull --no-rebase  
+(this merges the upstream branch with your current branch.  
+If you wanna see what you've done, compare the merge commit with the HEAD of your branch before merging.  
+eg: `git diff merge_commit..previous_HEAD` to view what you have done  
+`git diff previous_HEAD..merge_commit` to view what merge commit brings to your branch)  
 (
-because git/github recommends merging instead of rebasing. rebasing can make it hard to know exactly what you done, and potentially miss commits.
-if rebase conflict, you resolve conflicted file and continue rebase workflows (git rebase --continue) which a bit complicated and easy to fail in some steps.
-while in merge, git shows you what files are conflicted, you resolve then commit. that's it.
+git/github recommends merging instead of rebasing. rebasing can make it hard to know exactly what you done, and potentially miss commits.
+if rebase conflict, you resolve conflicted file and continue rebase workflows (git rebase --continue) which is a bit complicated and easy to fail in some steps.
+Not mention, rebase will re-apply changes commit-by-commit, if 10 commits conflict, you have to resolve, then continue, then repeat those tasks 10 times. 
+while in merge, git shows you what files are conflicted, you resolve once then commit once. that's it.
 )
 
-**fast-forward**: can only happen when the receiving branch is behind the merging branch. git pull always try using fast-forward before other methods.  
+**fast-forward**: can only happen when the receiving branch is behind the merging branch (relates to Parent Commit). git pull always try using fast-forward before other methods.  
 eg: if branchA fast-forward merges branch B.  
-branchB: 1->2->3->4  
 branchA: 1->2  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\  
+branchB: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3->4  (2 is parent commit of 3, 3 is parent commit of 4)
+
 after fast-forward: branchA: 1->2->3->4 (the head of A is fast-forwarded to 4)  
 command-line:   
- git checkout branchA  
- git pull --ff-only . branchB  
+`git checkout branchA `   
+`git pull --ff-only . branchB ` 
 
-**rebase**: put changes of receiving branch after the base branch. no merge commit is created. usually used when pulling another remote branch.  
+**rebase**: put changes of receiving branch after the base branch. no merge commit is created.
+Internally, git re-creates new commits on base branch, check if a commit is already in hisotry, if not, it will apply changes step by step.  
+If a commit is already in history, git skip applying that commit. Two commits are same if they are exactly same, eg: modify to the same file and no other files.
 eg: if branch A rebases to branch B:  
 branchB: 1->2->3->4  
-branchA: 1->2->5->6  
-after rebase: branchA: 1->2->3->4 ->5->6 (the changes of A is put after the tip of branch B)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\  
+branchA:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5->6  
+after rebase: branchB: 1->2->3->4 ->5->6 (the changes of A is re-created and put after the tip of branch B)  
 command-line:   
- git checkout branchA  
- git pull --rebase origin branchB  
+`git checkout branchA  `  
+`git pull --rebase origin branchB`  
+ or:  
+`git rebase branchB`
 
 **rebase interactive**: usually used when re-writing commit history for its own branch. for example, combine some unneccessary commits into one.
 It's dangerous due to potential commit removing permanently (if you accidentally hit the command 'drop' in rebase editor).
@@ -131,22 +141,28 @@ Use it carefully if you have really long list of commits for a single feature.
 only after you merge that pull request, the merge commit is generated and that merge commit will contain new changes. 
 It's safe, but make you hard to know which changes is old or new)  
 command-line:  
- get checkout branchA  
- git rebase --interactive commit_sha...  
+`get checkout branchA  `  
+` git rebase --interactive commit_sha...  `  
  in rebase editor:  
   i: to insert.  
   esc: to go out of insert mode.  
   :wq -> write then quit.  
   :exit -> abort.  
 
-**merge**: (or three-ways merge), will mix changes from receiving branch to passed branch in timestamp order. create a separate commit indicates merging.  
+**merge**: (or three-ways merge), will create a merge commit indicates merging. This merge commit has two parent commits, one points to tip of base branch, one points to tip of merging branch.  
+Internally, git gathers all changes in a file and compares to all changes in that file of another branch. If changes are same, it is ok. If changes are not same, git show conflict error and wait for user to resolve it.  
+Note that git compare changes by line. If changes happen in same file but different lines, it is ok and mergable. Only conflict when differences in same line.
 eg: if branchA merges branch B.  
 branchB: 1->2->4->6  
-branchA: 1->2->3->5  
-after merging: branchA: 1->2->3->4->5->6->new merge commit  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\  
+branchA:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3->5  
+after merging: branchA:   
+1->2->4->6-> new merge commit  
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/  
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3-------->5  
 command-line:   
- git checkout branchA  
- git merge branchB  
+`git checkout branchA`  
+`git merge branchB`  
 
 example:  
 
