@@ -186,8 +186,8 @@ Regardless of what type of merge methods in pull request (merge, squash, rebase)
 
 # 4. Github merge, rebase, fast-forward:
 **recommended**:
-- set default: git config --global pull.ff only (this makes pull aborted if upstream branch & local branch diverge).
-- if divergence, try: git pull --no-rebase  
+- set default: `git config --global pull.ff only` (this makes pull aborted if upstream branch & local branch diverge).
+- if divergence, try: `git pull --no-rebase`  
 (this merges the upstream branch with your current branch.  
 If you wanna see what you've done, compare the merge commit with the HEAD of your branch before merging.  
 eg: `git diff merge_commit..previous_HEAD` to view what you have done  
