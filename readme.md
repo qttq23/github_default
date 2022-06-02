@@ -1,6 +1,6 @@
 
 
-# git common commands:
+# 1.  git common commands:
 
 git clone "url" 
 
@@ -37,7 +37,7 @@ git diff HEAD..branch
 git show HEAD..branch
 
 
-# github basics:
+# 2. github basics:
 
 - create account on Github.
 After created, the email will be hidden and github automatically generate an alternative email (id-username@noreply....).
@@ -75,7 +75,7 @@ for Windows, go to Control panel > User accounts > credential manager > windows 
 Then do some identity-related tasks on git, it will open dialog to ask credentials again.
 remember to set user.email to your new alternative email.
 
-# commit & branch & changes/differences:
+# 3. commit & branch & changes/differences:
 
 Each **commit** is assigned a hash value which is unique within the repository.
 
@@ -161,7 +161,7 @@ This makes this command also not appropriate for previewing what changes   after
 (same as git log, but show commits along with changes)  
 
 
-# Github control & manage branch:  
+# 3. Github control & manage branch:  
 
 to avoid directly pushing to 'main' branch,
 to make all changes to 'main' branch must go through Pull Request.
@@ -184,7 +184,7 @@ in a nutshell:
 
 Regardless of what type of merge methods in pull request (merge, squash, rebase), I recommend 2 github-actions for a repo. 1 github-action for checking authorization as described above. 1 github-action for testing, this wil run on pull_request event to test the merging branch and pull_request_target/closed event to test base branch after merging. (https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#running-your-workflow-when-a-pull-request-merges-1) 
 
-# Github merge, rebase, fast-forward:
+# 4. Github merge, rebase, fast-forward:
 **recommended**:
 - set default: git config --global pull.ff only (this makes pull aborted if upstream branch & local branch diverge).
 - if divergence, try: git pull --no-rebase  
@@ -277,7 +277,7 @@ outdated:
 -> all are ok. because git pull always try and use fast-forward first.  
 
  
-# Github fork:
+# 5. Github fork:
 In github repository, only collaborators are allowed to push/write to a new branch.  
 Contributor (who're not a collaborator) can't create or update branch, they can only create pull request.  
 Fork solves this. Contributors forks a repository to make their own repository.  
@@ -328,5 +328,91 @@ https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/propos
 
  
 
-# Git submodule
-??
+# 6. Git submodule
+Git submodule is a git repository that is referenced by another git repository. Think of a parent repo that refers to other 3rd-party git libraries, those 3rd-party libs are called submodules.
+
+Instead of put all 3rd-party library code directly inside your codebase, you can use Git submodule to refer to specific commit or version. Then when you clone your repo, you also clone all git submodules. In the future, if 3rd-party libs update to newer version, you can easily point to those new versions too. Git submodule is usually used in C/C++. The equivalent tool in Nodejs is NPM. But Git submodule even allows you to make changes to 3rd-party libs (using fork).
+
+To be honest, the commands of git submodule is a bit complex compared to other package management tools. So I wrote a script that simplify these commands and can be used cross-platform. see workflows below for details.
+
+### basic workflows:
+
+git submodule workflows:
+- add a submodule to a specific folder path:  
+`git submodule add "url_to_submodule" path_to_folder`
+
+git will create a file '.gitmodules' which holds reference to url. 
+additonionally, git registers module to internal file (config) and fetch that module to path_to_folder.
+
+- change submodule to a specific version: go to that submodule directory and:  
+`git checkout commit_sha`  
+or:  
+`git checkout v1.2.3`  
+(this is a bit cumbersome while in NPM, you just need to specify name & version of package in one command)
+
+- commit changes in superproject: to tell git that you just add a submodule and use at specific commit, go back to superproject, and run:  
+`git add .`  
+`git commit -m "use submodule at v1.2.3"`  
+
+- later, other contributors will pull your repo and run:  
+`git submodule update --init`  
+This will register submodules and fetch those into your repo and also change to the version that you specified previsouly.
+
+That is the basics of submdoule, you `add` it once, and `update` it everytime you clone the repo or use newer version of submodule. I wrote a script that do all these boring things at: https://github.com/qttq23/parent_module/blob/main/module  
+eg:  
+`sh module` (sync & update all modules recursively)  
+`sh module add url path_to_module` (add new submodule)  
+`sh module remove path_to_module` (remove a submodule)
+
+### Git utilities for submodule:  
+`git clone --recurse-submodules git://github.com/foo/bar.git`  
+clone a repo with all submodules of it.  
+
+`git checkout --recurse-submodules`  
+go to another branch, and also update all submodules to that branch.
+
+`git submodule update --init --recursive`  
+update all submodules recursively in current branch.
+
+### remove submodule:
+If you want to remove a submodule, you have to remove 4 traces: the entry in `.gitsubmodules`, the entry in `.git/config` file, the internal directory `.git/modules/path_to_submodule` and the working directory of submodule. as followings:  
+`git submodule deinit --force "$directory"`  
+delete working directory & unregister submodule
+
+`git rm --force "$directory"`  
+delete working directory & remove entry in .gitmodules file
+
+`rm -rf ".git/modules/$directory"`  
+delete internal directory (rm is only available in bash)
+
+That's a lot to remember, or you can use the script I wrote (link above) to remove a submodule.
+
+### make changes to submodule:
+Most of the time, you add 3rd-party lib, update to newer version or remove it. You rarely want to change content of a library because you may lack the knowledge about library implementation. But if you surely want, you can use `git submodule` along with `github fork`. as followings:
+
+- create fork repo of the library you want to tweak.
+- change the submodule url to new url of your fork repo:  
+`git submodule set-url path_to_submodule new_url`  
+then update:  
+`git submodule sync`  
+`git submodule update --init`  
+
+- now, you can go to submodule directory, make add changes and commit. Remember, if you make changes, you have to push to your fork repo.
+```
+cd path_to_submodule
+echo "sdflks">abc.txt
+git add .
+git commit -m "add abc.txt"
+git push
+````
+
+- then go back to outer project, and commit that you have changed the submodule to point to another commit.
+```
+cd ..
+git add .
+git commit -m "use submodule at commit abcxyz"
+```
+
+- later, if others pull your changes, they have to sync new url and update the submodule to match new commit. all are packed in my script:  
+`sh module`
+
