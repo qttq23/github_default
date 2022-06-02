@@ -93,6 +93,7 @@ in a nutshell:
 - go to settings, set rule for main branch: set 'require pull request before merging', and all its sub-options.
 )
 
+Regardless of what type of merge methods in pull request (merge, squash, rebase), I recommend 2 github-actions for a repo. 1 github-action for checking authorization as described above. 1 github-action for testing, this wil run on pull_request event to test the merging branch and pull_request_target/closed event to test base branch after merging. (https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#running-your-workflow-when-a-pull-request-merges-1) 
 
 # Github merge, rebase, fast-forward:
 **recommended**:
