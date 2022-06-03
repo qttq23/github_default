@@ -100,12 +100,14 @@ I recommend using: `gitk` or sublime merge (a git client) to view graph of commi
 
 ### Changes after merging
 To view changes after merging, there's only way that is accurate is trying merging.  
+
 eg: 'main' is about to merge 'branch' (HEAD is pointing to 'main')  
+To view what in 'branch' will be merged, use:  
+`git diff HEAD...branch`  
+or:   
+`git show HEAD..branch`  
 
-For simple cases where the 'branch' does not involve rebase,   
-use: `git show HEAD..branch`  
-
-For more accurate, create a temporary branch to try merging then compare differences.  
+To view actual result of merging, create a temporary branch to try merging then compare differences.  
 create a temporary branch 'temp' based on 'main'.   
 then just merge 'temp' to 'branch'. after merging, 'temp' will point to the merge commit.  
 to see differences: ``git diff main..temp ``  
