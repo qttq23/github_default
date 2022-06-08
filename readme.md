@@ -192,8 +192,8 @@ Regardless of what type of merge methods in pull request (merge, squash, rebase)
 - if divergence, try: `git pull --no-rebase`  
 (this merges the upstream branch with your current branch.  
 If you wanna see what you've done, compare the merge commit with the HEAD of your branch before merging.  
-eg: `git diff merge_commit..previous_HEAD` to view what you have done  
-`git diff previous_HEAD..merge_commit` to view what merge commit brings to your branch)  
+eg: `git diff merge_branch...HEAD` to view what you have done  
+`git diff HEAD...merge_branch` to view what merge commit brings to your branch)  
 - if `--no-rebase` failed, you may try to merge two branches without any common commit. This usually happens at the first time you create repo at Github with some initial files then pull to local Git. In this case, use `git pull --rebase`. For later on, you should use `--no-rebase` as discussed above.    
 (
 git/github recommends merging instead of rebasing. rebasing can make it hard to know exactly what you done, and potentially miss commits.
